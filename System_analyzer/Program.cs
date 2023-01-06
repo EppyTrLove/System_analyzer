@@ -41,13 +41,13 @@ class Programm
         if (files != null)
         {
             //выводим имена файлов в консоль
-            foreach (FileInfo fi in files)
+            foreach (var fi in files)
                 File.AppendAllText(@"C:\Solvery1\File_DataBase.txt", fi.FullName + Separator + fi.CreationTime +
                     Separator + fi.Extension + Separator + fi.Length + Environment.NewLine);
             //получаем все подкаталоги
             subDirs = root.GetDirectories();
             //проходим по каждому подкаталогу
-            foreach (DirectoryInfo dirInfo in subDirs)
+            foreach (var dirInfo in subDirs)
             {
                 //рекурсия
                 Walk(dirInfo);
@@ -60,7 +60,7 @@ class Programm
         var sizeTable = new ConsoleTable("File name", "File size");
         var extensionTable = new ConsoleTable("File name", "File extension");
         var dateTimeTable = new ConsoleTable("File name", "File date");
-        foreach (string line in File.ReadLines(@"C:\Solvery1\File_DataBase.txt"))
+        foreach (var line in File.ReadLines(@"C:\Solvery1\File_DataBase.txt"))
         {
             string[] ns = line.Split(';');
             sizeTable.AddRow(ns[0], ns[3]);
