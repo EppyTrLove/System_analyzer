@@ -36,252 +36,121 @@ class FileModel
 }
 class Programm
 {
-    public static void Walk(DirectoryInfo root)
+    public static void Walk(string root)
     {
-        FileInfo[] files;
-        DirectoryInfo[] subDirs;
-        try
+        var dirs = new Stack<string>();
+        if (!Directory.Exists(root))
+            throw new ArgumentException();
+        dirs.Push(root);
+        while (dirs.Count > 0)
         {
-            files = root.GetFiles();
-            foreach (var fi in files)
-                //условие ниже работает некорректно
-                if (!File.ReadAllText(@"C:\Solvery1\File_DataBase.txt").Contains(fi.FullName))
-                File.AppendAllText(@"C:\Solvery1\File_DataBase.txt",
-                        new FileModel(fi.FullName, fi.CreationTime, fi.Extension, fi.Length).ToString());
-            subDirs = root.GetDirectories();
-            foreach (var dirInfo in subDirs)
-                {
-                File.AppendAllText(@"C:\Solvery1\File_DataBase.txt",
-                        new FileModel(dirInfo.FullName, dirInfo.CreationTime, dirInfo.Extension,
-                        dirInfo.GetFiles().Sum(x => x.Length)).ToString());
-                Walk(dirInfo);
-                 }
-        }
-        catch (DirectoryNotFoundException)
-        {
-            Console.WriteLine("DirectoryNotFoundException: The selected directory was not found");
-        }
-        catch (UnauthorizedAccessException)
-        {
-      
-            Console.WriteLine($"UnAuthorizedAccessException: Unable to access file");
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e.Message);
-        }
-    }
-    private static void SortData(string path, out IEnumerable<FileModel> extensionList, 
-        out IEnumerable<FileModel> sizeList, out IEnumerable<FileModel> creationList)
-    {
-        var data = new List<FileModel>();
-        foreach (var line in File.ReadLines(path))
-        {
-            var ns = FileModel.FromString(line);
-            data.Add(ns);
-        }
+            var currentDir = dirs.Pop();
+            string[] subDirs = null;
+            try
+            {
 
-        extensionList = data
-            .OrderByDescending(x => x.Size)
-            .DistinctBy(x => x.Extension)
-            .Take(10);
-        sizeList = data
-            .OrderByDescending(x => x.Size)
-            .Take(10);
-         creationList = data
-            .OrderByDescending(x => x.Date)
-            .Take(10);
-        //countList = data
-        //    .OrderByDescending(x => x.Extension.Count())
-        //    .Take(10);
+                subDirs = Directory.GetDirectories(currentDir);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            string[] files = null;
+            try
+            {
+                files = Directory.GetFiles(currentDir);
+            }
+            catch (UnauthorizedAccessException e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Console.WriteLine(e.Message);
+                continue;
+            }
+            foreach (string file in files)
+            {
+                var fi = new FileInfo(file);
+                if (!File.ReadAllText(@"C:\Solvery1\File_DataBase.txt").Contains(fi.Name))
+                    File.AppendAllText(@"C:\Solvery1\File_DataBase.txt",
+                        new FileModel(fi.Name, fi.CreationTime, fi.Extension, fi.Length).ToString());
+            }
+            foreach (var dir in subDirs)
+                dirs.Push(dir);
+        }
     }
-    private static void PrintTable(IEnumerable<FileModel> dataList,
+    private static IEnumerable<(string Name, string Value)> GetTop10ByExtensionPopularity(string path
+        = @"C:\Solvery1\File_DataBase.txt")
+    {
+        var data = File.ReadLines(path)
+            .Select(x => FileModel.FromString(x));
+        var result = data
+            .GroupBy(x => x.Extension)
+            .OrderByDescending(x => x.Count())
+            .Take(10)
+            .SelectMany(x => x);
+        return result;
+    }
+    private static IEnumerable<(string Name, string Value)> GetTop10ByFileSize(string path
+        = @"C:\Solvery1\File_DataBase.txt")
+    {
+        var data = File.ReadLines(path)
+            .Select(x => FileModel.FromString(x));
+        var result = data
+         .OrderByDescending(x => x.Size)
+         .Take(10);
+        return result;
+    }
+    private static IEnumerable<(string Name, string Value)> GetTop10ByExtensionSize(string path
+        = @"C:\Solvery1\File_DataBase.txt")
+    {
+        var data = File.ReadLines(path)
+            .Select(x => FileModel.FromString(x));
+        var result = data
+         .OrderByDescending(x => x.Size)
+         .Take(10);
+        return result;
+    }
+
+
+    private static void PrintTable(IEnumerable<(string Name, string Value)> dataList,
           string name, string valueName)
     {
-        switch (valueName)
-        {
-            case "File size":
-                {
-                    var tableSize = new ConsoleTable(name, valueName);
-                    foreach (var item in dataList)
-                        tableSize.AddRow(item.Name, item.Size);
-                    tableSize.Write();
-                    break;
-                }
-            case "File date":
-                {
-                    var tableDate = new ConsoleTable(name, valueName);
-                    foreach (var item in dataList)
-                        tableDate.AddRow(item.Name, item.Date);
-                    tableDate.Write();
-                    break;
-                }
-            case "File extension":
-                {
-                    var tableExtension = new ConsoleTable(name, valueName);
-                    foreach (var item in dataList)
-                        tableExtension.AddRow(item.Name, item.Extension);
-                    tableExtension.Write();
-                    break;
-                }
-            case "Directory size":
-                {
-                    var tableDirSize = new ConsoleTable(name, valueName);
-                    foreach (var item in dataList)
-                        if(item.Name.Contains(""))
-                        tableDirSize.AddRow(item.Name, item.Size);
-                    tableDirSize.Write();
-                    break;
-                }
-            case "Extension size":
-                {
-                    var tableDirSize = new ConsoleTable(name, valueName);
-                    foreach (var item in dataList)
-                            tableDirSize.AddRow(item.Extension, item.Size);
-                    tableDirSize.Write();
-                    break;
-                }
-        }  
+        var tableSize = new ConsoleTable(name, valueName);
+        foreach (var item in dataList)
+            tableSize.AddRow(item.Name, item.Value);
+        tableSize.Write();
     }
+
     public static void Main(string[] args)
     {
         // Data acsess Доступ к данным(Работа с файловой системой)
         // Buiseness logic Бизнес-логика(Сортировка)
         // Presentation Представлеие(Вывод в консоль)
-
-        IEnumerable<FileModel> extensionList;
-        IEnumerable<FileModel> sizeList;
-        IEnumerable<FileModel> creationList;
-        IEnumerable<FileModel> countList;
-        Walk(new DirectoryInfo(@"C:\"));
-        SortData(@"C:\Solvery1\File_DataBase.txt", out extensionList, out sizeList, out creationList);
-        PrintTable(sizeList, "File name", "File size");
-        PrintTable(creationList, "File name", "File date");
-        PrintTable(extensionList, "File name", "File extension");
-        PrintTable(sizeList, "Directory name", "Directory size");
-        PrintTable(extensionList, "Extension name", "Extension size");
+        Console.WriteLine("Please enter the path: ");
+        var inputValue1 = Console.ReadLine();
+        Walk(@inputValue1);
+        Console.WriteLine("Please enter one of the options from 1 to 3:\n" +
+            "1. Get top 10 by extension popularity\n2. Get top 10 by file size\n" +
+            "3. Get top 10 by extension size");
+        int tableNumber;
+        bool sucsess = int.TryParse(Console.ReadLine(), out tableNumber);
+        if (sucsess)
+            if (tableNumber == 1)
+                PrintTable(GetTop10ByExtensionPopularity(), "File name", "File extension");
+            else if (tableNumber == 2)
+                PrintTable(GetTop10ByFileSize, "File name", "File size");
+            else if (tableNumber == 3)
+                PrintTable(GetTop10ByExtensionSize, "Extension name", "Extension size");
+            else
+                Console.WriteLine("Input error!");
     }
 }
-
-
-
-
-
-
-
-
-//class FileModel
-//{
-//    public const string Separator = ";";
-//    public FileModel(string name, DateTime date, string extension, long size)
-//    {
-//        Name = name;
-//        Size = size;
-//        Extension = extension;
-//        Date = date;
-//    }
-//    public string Name { get; set; }
-//    public DateTime Date { get; set; }
-//    public string Extension { get; set; }
-//    public long Size { get; set; }
-
-//    public override string ToString()
-//    {
-//        return $"{Name}{Separator}{Date}{Separator}{Extension}{Separator}{Size}";
-//    }
-//    public static FileModel FromString(string source)
-//    {
-//        var arr = source.Split(Separator);
-//        return new FileModel(arr[0], DateTime.Parse(arr[1]), arr[2], long.Parse(arr[3]));
-//    }
-//}
-//class Program
-//{
-//    public static void Walk(DirectoryInfo root)
-//    {
-//        const string Separator = ";";
-//        FileInfo[] files = null;
-//        DirectoryInfo[] subDirs = null;
-//        // Получаем все файлы в текущем каталоге
-//        files = root.GetFiles();
-//        if (files != null)
-//        {
-//            //выводим имена файлов в консоль
-//            foreach (var fi in files)
-//                File.AppendAllText(@"C:\Solvery1\File_DataBase.txt", fi.FullName + Separator + fi.CreationTime +
-//                    Separator + fi.Extension + Separator + fi.Length + Environment.NewLine);
-//            //получаем все подкаталоги
-//            subDirs = root.GetDirectories();
-//            //проходим по каждому подкаталогу
-//            foreach (var dirInfo in subDirs)
-//            {
-//                //рекурсия
-//                Walk(dirInfo);
-//            }
-//        }
-//    }
-//    public static void Main(string[] args)
-//    {
-//        Walk(new DirectoryInfo(@"C:\Users\eppy_\OneDrive\Рабочий стол\С#"));
-//        var sizeTable = new ConsoleTable("File name", "File size");
-//        var extensionTable = new ConsoleTable("File name", "File extension");
-//        var dateTimeTable = new ConsoleTable("File name", "File date");
-//        foreach (var line in File.ReadLines(@"C:\Solvery1\File_DataBase.txt"))
-//        {
-//            string[] ns = line.Split(';');
-//            sizeTable.AddRow(ns[0], ns[3]);
-//            extensionTable.AddRow(ns[0], ns[2]);
-//            dateTimeTable.AddRow(ns[0], ns[1]);
-//        }
-//        //sizeTable.Rows.OrderByDescending(y => y.Length);
-//        sizeTable.Write();
-//        extensionTable.Write();
-//        dateTimeTable.Write();
-//    }
-//}
-
-
-
-//foreach (string text in newText)
-//{
-//    Console.WriteLine(text);
-//}
-//sizeTable.Write();
-
-
-//    var c = FileModel.FromString(sr.ReadLine());
-//var sizeTable = new ConsoleTable("File name", "File size");
-//var extensionTable = new ConsoleTable("File name", "File extension");
-//var dateTimeTable = new ConsoleTable("File name", "File date");
-//sizeTable.AddRow(c.Name, c.Size);
-//sizeTable.Write();
-//extensionTable.AddRow(c.Name, c.Extension);
-//extensionTable.Write();
-//dateTimeTable.AddRow(c.Name, c.Date);
-//dateTimeTable.Write();
-
-
-
-
-//ileModel.FromString(@"C:\Solvery1\File_DataBase.txt");
-//if (fileInfo.Exists)
-//{
-//File.Create(@"C:\Solvery1\File_DataBase.txt");
-// using (var sw = fileInfo.CreateText())
-//  {
-//     sw.WriteLine(fileInfo.Name + ";" + fileInfo.CreationTime + ";" + fileInfo.Length);
-// }
-//if (fileInfo.Exists)
-//{
-//    foreach (var file in Directory.GetFiles(@"C:\Solvery", "*", SearchOption.AllDirectories))
-//{
-//    var fileInfo = new FileInfo(@"C:\Solvery");
-//    File.AppendAllText(@"C:\Solvery1\File_DataBase.txt", fileInfo.FullName + ";" + fileInfo.CreationTime +
-//    ";" + fileInfo.Extension + fileInfo.Length+ ";" + Environment.NewLine);
-//}
-//}
-//var dir = new DirectoryInfo(@"C:\Solvery");
-//foreach (var file in Directory.EnumerateFiles(@"C:\Solvery", "*", SearchOption.AllDirectories))
-//File.AppendAllText(@"C:\Solvery\File_DataBase.txt", file);
-// ProcessDirectory(@"C:\Solvery");
-
