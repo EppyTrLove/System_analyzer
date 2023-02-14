@@ -1,28 +1,39 @@
-﻿namespace System_analyzer
+﻿using System;
+using System.Collections;
+using System.Text.Json;
+
+namespace System_analyzer
 {
-    public class FileModel
+    public class FileModel : IEquatable<FileModel>
     {
             private const string Separator = ";";
             public FileModel(string name, DateTime date, string extension, long size)
             {
                 Name = name;
-                Size = size;
-                Extension = extension;
                 Date = date;
-            }
+                Extension = extension;
+                Size = size;
+        }
             public string Name { get; set; }
             public DateTime Date { get; set; }
             public string Extension { get; set; }
             public long Size { get; set; }
 
-            public override string ToString()
+            public static string ToString(FileModel model)
             {
-                return $"{Name}{Separator}{Date}{Separator}{Extension}{Separator}{Size}{Environment.NewLine}";
+                return JsonSerializer.Serialize(model);
             }
             public static FileModel FromString(string source)
             {
-                var arr = source.Split(Separator);
-                return new FileModel(arr[0], DateTime.Parse(arr[1]), arr[2], long.Parse(arr[3]));
+                var model = JsonSerializer.Deserialize<FileModel>(source);
+                return new FileModel(model.Name, model.Date, model.Extension, model.Size);
             }
+
+        public bool Equals(FileModel? other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return Name == other.Name && Extension== other.Extension && Size == other.Size;
         }
+    }
     }
