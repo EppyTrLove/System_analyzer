@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Text.Json;
 
 namespace System_analyzer
 {
@@ -15,13 +16,13 @@ namespace System_analyzer
         public FileModel[] GetAll()
         {
             return File.ReadAllLines(_dataBasePath)
-                .Select(x => FileModel.FromString(x))
-                .ToArray();
+                .Select(x => JsonSerializer.Deserialize<FileModel>(x))
+                .ToArray()!;
         }
         public void Add(FileModel[] models)
         {
             foreach (var model in models)
-            File.AppendAllText(_dataBasePath, $"{FileModel.ToString(model)}\n");
+            File.AppendAllText(_dataBasePath, $"{JsonSerializer.Serialize(model)}\n");
         }
         public void RemoveAll()
         {
