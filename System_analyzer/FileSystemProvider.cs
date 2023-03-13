@@ -10,9 +10,9 @@ namespace System_analyzer;
 
 public class FileSystemProvider
 {
-    public static List<FileModel> Get(string root)
+    public static List<IFileSystemItem> Get(string root)
     {
-        var result = new List<FileModel>();
+        var result = new List<IFileSystemItem>();
         var dirs = new Stack<string>();
         if (!Directory.Exists(root))
             throw new ArgumentException();
@@ -39,8 +39,10 @@ public class FileSystemProvider
             foreach (var dir in subDirs)
             {
                 var di = new DirectoryInfo(dir);
-                result.Add(new FileModel(di.FullName, di.CreationTime, di.Extension,
-                    di.GetFiles().Sum(x => x.Length)));
+                result.Add(new DirectoryModel(di.FullName, di.Extension, new DirectoryInfo(di.FullName)
+                    .GetFiles("*.*", SearchOption.AllDirectories)
+                    .Select(x => x.Length)
+                    .Sum()));
             }
             string[] files = null;
             try
@@ -67,26 +69,26 @@ public class FileSystemProvider
         }
         return result;
     }
-    public static List<FileModel> DirectoryAttachmentInfo(string path) 
+    public static List<IFileSystemItem> DirectoryAttachmentInfo(string path) 
     {
-        var result = new List<FileModel>();
         if (!Directory.Exists(path))
             throw new ArgumentException();
-        FileInfo[] files;
-        DirectoryInfo[] subDirs;
-        files = new DirectoryInfo(path).GetFiles();
-        foreach (var fi in files)
-            result.Add(new FileModel(fi.FullName, fi.CreationTime, fi.Extension, fi.Length));
-        subDirs = new DirectoryInfo(path).GetDirectories();
-        foreach (var dirInfo in subDirs) 
-            result.Add(new FileModel(dirInfo.FullName, dirInfo.CreationTime, dirInfo.Extension,
-               new DirectoryInfo(dirInfo.FullName)
-                .GetFiles("*.*", SearchOption.AllDirectories)
-                .Select(x => x.Length)
-                .Sum()));
-        return result;
+            var result = new List<IFileSystemItem>();
+            FileInfo[] files;
+            DirectoryInfo[] subDirs;
+            files = new DirectoryInfo(path).GetFiles();
+            foreach (var fi in files)
+                result.Add(new FileModel(fi.FullName, fi.CreationTime, fi.Extension, fi.Length));
+            subDirs = new DirectoryInfo(path).GetDirectories();
+            foreach (var dirInfo in subDirs)
+                result.Add(new DirectoryModel(dirInfo.FullName, dirInfo.Extension, new DirectoryInfo(dirInfo.FullName)
+                    .GetFiles("*.*", SearchOption.AllDirectories)
+                    .Select(x => x.Length)
+                    .Sum()));
+            return result;
+        }
 
     }
-}  
+  
 
 

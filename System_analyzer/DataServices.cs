@@ -9,7 +9,7 @@ namespace System_analyzer
 {
     public class DataServices
     {
-        public static IEnumerable<(string Name, string Value)> GetTop10ByExtensionPopularity(IEnumerable<FileModel> data)
+        public static IEnumerable<(string Name, string Value)> GetTop10ByExtensionPopularity(IEnumerable<IFileSystemItem> data)
         {
             var result = data
                 .GroupBy(x => x.Extension)
@@ -20,7 +20,7 @@ namespace System_analyzer
                 .Select(x => (x.Name, x.Extension));
             return result;
         }
-        public static IEnumerable<(string Name, string Value)> GetTop10ByFileSize(IEnumerable<FileModel> data)
+        public static IEnumerable<(string Name, string Value)> GetTop10ByFileSize(IEnumerable<IFileSystemItem> data)
         {
             var result = data
              .OrderByDescending(x => x.Size)
@@ -28,7 +28,7 @@ namespace System_analyzer
              .Take(10);
             return result;
         }
-        public static IEnumerable<(string Name, string Value)> GetTop10ByExtensionSize(IEnumerable<FileModel> data)
+        public static IEnumerable<(string Name, string Value)> GetTop10ByExtensionSize(IEnumerable<IFileSystemItem> data)
         {
             var result = data
              .OrderByDescending(x => x.Size)
@@ -37,10 +37,10 @@ namespace System_analyzer
              .Select(x => (x.Extension, x.Size.ToString()));
             return result;
         }
-        public static FileModel[] FindDuplicateFiles(IEnumerable<FileModel> data)
+        public static IFileSystemItem[] FindDuplicateFiles(IEnumerable<IFileSystemItem> data)
         {
             int count = 0;
-            var result = new List<FileModel>();
+            var result = new List<IFileSystemItem>();
             foreach (var model in data)
             {
                 if (model.Size > 65000)
@@ -50,39 +50,38 @@ namespace System_analyzer
             }
             return result.GroupBy(x => x.Name).Select(x => x.First()).ToArray();
         }
-        public static FileModel[] FindDiffNameDuplicateFiles(IEnumerable<FileModel> data) 
+        public static IFileSystemItem[] FindDiffNameDuplicateFiles(IEnumerable<IFileSystemItem> data) 
         {     
-            var modelArr = data.ToArray();
-            var result = new List<FileModel>();
-            for (var i = 0; i < modelArr.Length; i++)
+            var model = data.ToArray();
+            var result = new List<IFileSystemItem>();
+            for (var i = 0; i < model.Length; i++)
             {
-                for (var j = i + 1; j < modelArr.Length; j++) // TODO: Уточнить, что скармливаем для GetBytes
+                for (var j = i + 1; j < model.Length; j++) 
                 {
-                    MD5 MD5Hash = MD5.Create();
-                    var tmpNewHash1 =  MD5Hash.ComputeHash
-                        (Encoding.ASCII.GetBytes(modelArr[i].Size.ToString()));
-                    var tmpNewHash2 =  MD5Hash.ComputeHash
-                        (Encoding.ASCII.GetBytes(modelArr[j].Size.ToString()));
-                    if (modelArr[i].Size > 65000 && tmpNewHash1 == tmpNewHash2)
-                        result.Add(modelArr[i]);
+                    var hash = MD5.Create();
+                    var tmpNewHash1 = hash.ComputeHash(File.ReadAllBytes(model[i].Path));
+                    var tmpNewHash2 = hash.ComputeHash(File.ReadAllBytes(model[j].Path));
+                    if (model[i].Size > 65000 && tmpNewHash1 == tmpNewHash2)
+                        result.Add(model[i]);
                 }
             }
             return result.GroupBy(x => x.Extension).Select(x => x.First()).ToArray();
         }
-        public static FileModel[] ReScanDirectory(List<FileModel> data, string newPath) 
-        {
-            var newData = FileSystemProvider.Get(newPath); // TODO: Работает некорректно
-                                                           // (Value does not fall within the expected range)
-            for (var i = 0; i < data.Count-1; i++) 
-                for (var j = 0; j < newData.Count-1; j++)
-                    if (data[i].Path == newData[j].Path)
-                    {
-                        data.Remove(data[i]);
-                        data.Add(newData[i]);
-                    }
-                return data.ToArray();
-        }
-        public static IEnumerable<(string Name, string Value)> GetDirectoryAttachmentInfo(IEnumerable<FileModel> data)
+        //public static FileModel[] ReScanDirectory(List<FileModel> data, string newPath) 
+        //{
+        //    var newData = FileSystemProvider.Get(newPath); // TODO: Работает некорректно
+        //                                                   // (Value does not fall within the expected range)
+        //    for (var i = 0; i < data.Count-1; i++) 
+        //        for (var j = 0; j < newData.Count-1; j++)
+        //            if (data[i].Path == newData[j].Path)
+        //            {
+        //                data.Remove(data[i]);
+        //                data.Add(newData[i]);
+        //            }
+        //        return data.ToArray();
+        //}
+        public static IEnumerable<(string Name, string Value)> 
+            GetDirectoryAttachmentInfo(IEnumerable<IFileSystemItem> data)
         {
             var result = data
              .OrderByDescending(x => x.Size)

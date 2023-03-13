@@ -2,6 +2,7 @@
 using ConsoleTables;
 using System.Collections.Generic;
 using System_analyzer;
+using System.Linq;
 
 class Programm
 {
@@ -21,10 +22,15 @@ class Programm
         // Buiseness logic Бизнес-логика(Сортировка)
         // Presentation Представлеие(Вывод в консоль) 
         var fileModelDao = new FileModelDaо($@"{Environment.CurrentDirectory}\Database.txt");
+        var data = fileModelDao.GetAll().ToList();
         Console.WriteLine("Please enter the path: ");
         var inputValue = Console.ReadLine();
-        var data = FileSystemProvider.Get(inputValue!);
-        fileModelDao.Add(data.ToArray()); 
+        if (!data.Any(x => x.Path.Contains(inputValue!)))
+        {
+            var localData = FileSystemProvider.Get(inputValue!);
+            fileModelDao.Add(localData.ToArray());
+            data.AddRange(localData);
+        }
         while (true)
         {
             Console.WriteLine("Please enter one of the options from 1 to 7:\n" +
@@ -53,15 +59,16 @@ class Programm
                 else if (serviceNumber == 6)
                 {
                     Console.WriteLine("Please enter the path you want to rescan:");
-                    fileModelDao.RemoveAll();
-                    fileModelDao.Add(DataServices.ReScanDirectory(data, Console.ReadLine()));
+                    var path = Console.ReadLine();
+                    data.RemoveAll(x => x.Path.Contains(path!));
+                    fileModelDao.ReScanDirecory(path!);
                 }
                 else if (serviceNumber == 7)
                 {
                     Console.WriteLine("Please enter the path you want to get info:");
                     inputValue = Console.ReadLine();
-                    data = FileSystemProvider.DirectoryAttachmentInfo(inputValue!);
-                    PrintTable(DataServices.GetDirectoryAttachmentInfo(data), "File name", "File size");
+                    var localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!);
+                    PrintTable(DataServices.GetDirectoryAttachmentInfo(localData), "File name", "File size");
 
                 }
                 else if (serviceNumber == 8)

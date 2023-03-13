@@ -1,6 +1,9 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Text;
 
 namespace System_analyzer
 {
@@ -13,13 +16,13 @@ namespace System_analyzer
             if (!File.Exists(_dataBasePath))
                 File.Create(_dataBasePath);
         }
-        public FileModel[] GetAll()
+        public IFileSystemItem[] GetAll()
         {
             return File.ReadAllLines(_dataBasePath)
-                .Select(x => JsonSerializer.Deserialize<FileModel>(x))
+                .Select(x => JsonSerializer.Deserialize<IFileSystemItem>(x))
                 .ToArray()!;
         }
-        public void Add(FileModel[] models)
+        public void Add(IFileSystemItem[] models)
         {
             foreach (var model in models)
             File.AppendAllText(_dataBasePath, $"{JsonSerializer.Serialize(model)}\n");
@@ -28,6 +31,23 @@ namespace System_analyzer
         {
             File.Delete(_dataBasePath);
             File.Create(_dataBasePath).Dispose();
+        }
+        public void ReScanDirecory(string path)
+        {
+            long startIndex = -1;
+            var tail = new List<IFileSystemItem>();
+            foreach (var line in File.ReadAllLines(_dataBasePath))
+            {
+                if (!tail.Any() && !line.Contains(path))
+                    startIndex += line.Length + Environment.NewLine.Length;
+                if (line.Contains(path))
+                    tail.Add(JsonSerializer.Deserialize<IFileSystemItem>(line));
+            }
+            var dataString = tail.Select(x => $"{JsonSerializer.Serialize(x)}\n");
+            using var fs = File.OpenWrite(_dataBasePath);
+            fs.Position = startIndex;
+            foreach(var str in dataString)
+            fs.Write(Encoding.Default.GetBytes(str));
         }
     }
 }
