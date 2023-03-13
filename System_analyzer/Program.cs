@@ -22,12 +22,13 @@ class Programm
         // Buiseness logic Бизнес-логика(Сортировка)
         // Presentation Представлеие(Вывод в консоль) 
         var fileModelDao = new FileModelDaо($@"{Environment.CurrentDirectory}\Database.txt");
+        var localData = new List<IFileSystemItem>();
         var data = fileModelDao.GetAll().ToList();
         Console.WriteLine("Please enter the path: ");
         var inputValue = Console.ReadLine();
         if (!data.Any(x => x.Path.Contains(inputValue!)))
         {
-            var localData = FileSystemProvider.Get(inputValue!);
+            localData = FileSystemProvider.Get(inputValue!);
             fileModelDao.Add(localData.ToArray());
             data.AddRange(localData);
         }
@@ -67,8 +68,8 @@ class Programm
                 {
                     Console.WriteLine("Please enter the path you want to get info:");
                     inputValue = Console.ReadLine();
-                    var localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!);
-                    PrintTable(DataServices.GetDirectoryAttachmentInfo(localData), "File name", "File size");
+                    localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!);
+                    PrintTable(DataServices.GetDirectoryAttachmentInfo(localData), "Name of Item", "File size");
 
                 }
                 else if (serviceNumber == 8)
