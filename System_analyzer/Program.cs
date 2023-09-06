@@ -35,10 +35,14 @@ class Programm
         while (true)
         {
             Console.WriteLine("Please enter one of the options from 1 to 7:\n" +
-                "1. Get top 10 by extension popularity\n2. Get top 10 by file size\n" +
-                "3. Get top 10 by extension size\n4. Get info obout big duplicate files\n" +
+                "1. Get top 10 by extension popularity\n" + 
+                "2. Get top 10 by file size\n" +
+                "3. Get top 10 by extension size\n" + 
+                "4. Get info obout big duplicate files\n" +
                 "5. Get info about about duplicate renamed files\n" +
-                "6. Rescan the directory\n" + "7. Get information about directory attachment\n" + "8. To exit");
+                "6. Rescan the directory\n" + 
+                "7. Get information about directory attachment\n" + 
+                "8. To exit");
             int serviceNumber;
             if (int.TryParse(Console.ReadLine(), out serviceNumber))
                 if (serviceNumber == 1)

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using static System.Net.WebRequestMethods;
 
 
 namespace System_analyzer;
@@ -69,17 +67,19 @@ public class FileSystemProvider
         }
         return result;
     }
-    public static List<IFileSystemItem> DirectoryAttachmentInfo(string path) 
+    public static List<IFileSystemItem> DirectoryAttachmentInfo(string newPath, IEnumerable<IFileSystemItem> data)
     {
-        if (!Directory.Exists(path))
+        if (!Directory.Exists(newPath))
             throw new ArgumentException();
+        if (!data.Any(x => x.Path.Contains(newPath!)))
+        {
             var result = new List<IFileSystemItem>();
             FileInfo[] files;
             DirectoryInfo[] subDirs;
-            files = new DirectoryInfo(path).GetFiles();
+            files = new DirectoryInfo(newPath).GetFiles();
             foreach (var fi in files)
                 result.Add(new FileModel(fi.FullName, fi.CreationTime, fi.Extension, fi.Length));
-            subDirs = new DirectoryInfo(path).GetDirectories();
+            subDirs = new DirectoryInfo(newPath).GetDirectories();
             foreach (var dirInfo in subDirs)
                 result.Add(new DirectoryModel(dirInfo.FullName, dirInfo.Extension, new DirectoryInfo(dirInfo.FullName)
                     .GetFiles("*.*", SearchOption.AllDirectories)
@@ -87,6 +87,12 @@ public class FileSystemProvider
                     .Sum()));
             return result;
         }
+        else 
+            foreach(var dir in data)
+            {
+                if 
+            }
+    }
 
     }
   
