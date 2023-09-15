@@ -2,8 +2,8 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Text;
+
 
 namespace System_analyzer
 {
@@ -19,13 +19,13 @@ namespace System_analyzer
         public IFileSystemItem[] GetAll()
         {
             return File.ReadAllLines(_dataBasePath)
-                .Select(x => JsonSerializer.Deserialize<IFileSystemItem>(x))
+                .Select(x => System.Text.Json.JsonSerializer.Deserialize<IFileSystemItem>(x))
                 .ToArray()!;
         }
         public void Add(IFileSystemItem[] models)
         {
             foreach (var model in models)
-            File.AppendAllText(_dataBasePath, $"{JsonSerializer.Serialize(model)}\n");
+                File.AppendAllText(_dataBasePath, $"{System.Text.Json.JsonSerializer.Serialize(model)}\n");
         }
         public void RemoveAll()
         {
@@ -41,16 +41,21 @@ namespace System_analyzer
                 if (!tail.Any() && !line.Contains(path))
                     startIndex += line.Length + Environment.NewLine.Length;
                 if (line.Contains(path))
-                    tail.Add(JsonSerializer.Deserialize<IFileSystemItem>(line));
+                    tail.Add(System.Text.Json.JsonSerializer.Deserialize<IFileSystemItem>(line));
             }
-            var dataString = tail.Select(x => $"{JsonSerializer.Serialize(x)}\n");
+            var dataString = tail.Select(x => $"{System.Text.Json.JsonSerializer.Serialize(x)}\n");
             using var fs = File.OpenWrite(_dataBasePath);
             fs.Position = startIndex;
-            foreach(var str in dataString)
-            fs.Write(Encoding.Default.GetBytes(str));
+            foreach (var str in dataString)
+                fs.Write(Encoding.Default.GetBytes(str));
         }
     }
+  
 }
+
+  
+
+
 
                 
         

@@ -18,6 +18,19 @@
           }
         }
       },
+      "LiteDB/5.0.17": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/LiteDB.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/LiteDB.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.NETCore.Platforms/1.1.0": {
         "type": "package",
         "compile": {
@@ -150,6 +163,26 @@
         "lib/netcoreapp3.1/ConsoleTables.pdb",
         "lib/netstandard1.3/ConsoleTables.dll",
         "lib/netstandard1.3/ConsoleTables.pdb"
+      ]
+    },
+    "LiteDB/5.0.17": {
+      "sha512": "cKPvkdlzIts3ZKu/BzoIc/Y71e4VFKlij4LyioPFATZMot+wB7EAm1FFbZSJez6coJmQUoIg/3yHE1MMU+zOdg==",
+      "type": "package",
+      "path": "litedb/5.0.17",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "AppVeyorSettings.json",
+        "LICENSE",
+        "icon_64x64.png",
+        "lib/net45/LiteDB.dll",
+        "lib/net45/LiteDB.xml",
+        "lib/netstandard1.3/LiteDB.dll",
+        "lib/netstandard1.3/LiteDB.xml",
+        "lib/netstandard2.0/LiteDB.dll",
+        "lib/netstandard2.0/LiteDB.xml",
+        "litedb.5.0.17.nupkg.sha512",
+        "litedb.nuspec"
       ]
     },
     "Microsoft.NETCore.Platforms/1.1.0": {
@@ -686,7 +719,8 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
-      "ConsoleTables >= 2.4.2"
+      "ConsoleTables >= 2.4.2",
+      "LiteDB >= 5.0.17"
     ]
   },
   "packageFolders": {
@@ -737,6 +771,10 @@
           "ConsoleTables": {
             "target": "Package",
             "version": "[2.4.2, )"
+          },
+          "LiteDB": {
+            "target": "Package",
+            "version": "[5.0.17, )"
           }
         },
         "imports": [

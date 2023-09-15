@@ -3,9 +3,11 @@ using ConsoleTables;
 using System.Collections.Generic;
 using System_analyzer;
 using System.Linq;
+using LiteDB;
 
 class Programm
 {
+
     private static void PrintTable(IEnumerable<(string Name, string Value)> dataList,
           string name, string valueName)
     {
@@ -15,7 +17,6 @@ class Programm
         tableSize.Write();
     }
     
-
     public static void Main(string[] args)
     {
         // Data acsess Доступ к данным(Работа с файловой системой)

@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "H1GKg3JJN3odtY10qUyU+CouZBB8z31adIR7jIFv7lJonsMqpOotQk9dT4vTCHl8iaxeuoVBFw0QCE/8IFZj3Q==",
+  "dgSpecHash": "yuJ2IpbhDfFMH6oYnZtWqKH01W0JfGV0Fj7WXiLgp92mvwXNCPxJCHOwx8ulQ6IjNYpGOa8sLpuzNocEYiewkQ==",
   "success": true,
   "projectFilePath": "C:\\Solvery\\System_analyzer\\System_analyzer\\System_analyzer.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\eppy_\\.nuget\\packages\\consoletables\\2.4.2\\consoletables.2.4.2.nupkg.sha512",
+    "C:\\Users\\eppy_\\.nuget\\packages\\litedb\\5.0.17\\litedb.5.0.17.nupkg.sha512",
     "C:\\Users\\eppy_\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\eppy_\\.nuget\\packages\\microsoft.netcore.targets\\1.1.0\\microsoft.netcore.targets.1.1.0.nupkg.sha512",
     "C:\\Users\\eppy_\\.nuget\\packages\\system.io\\4.3.0\\system.io.4.3.0.nupkg.sha512",
