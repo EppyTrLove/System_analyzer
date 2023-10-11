@@ -67,19 +67,6 @@ namespace System_analyzer
             }
             return result.GroupBy(x => x.Extension).Select(x => x.First()).ToArray();
         }
-        //public static FileModel[] ReScanDirectory(List<FileModel> data, string newPath) 
-        //{
-        //    var newData = FileSystemProvider.Get(newPath); // TODO: Работает некорректно
-        //                                                   // (Value does not fall within the expected range)
-        //    for (var i = 0; i < data.Count-1; i++) 
-        //        for (var j = 0; j < newData.Count-1; j++)
-        //            if (data[i].Path == newData[j].Path)
-        //            {
-        //                data.Remove(data[i]);
-        //                data.Add(newData[i]);
-        //            }
-        //        return data.ToArray();
-        //}
         public static IEnumerable<(string Name, string Value)> 
             GetDirectoryAttachmentInfo(IEnumerable<IFileSystemItem> data)
         {

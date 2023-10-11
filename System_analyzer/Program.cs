@@ -4,9 +4,13 @@ using System.Collections.Generic;
 using System_analyzer;
 using System.Linq;
 using LiteDB;
+using System_analyzer.Daos.Abstractions;
+using System_analyzer.Daos.FileSystem;
+using System_analyzer.Daos.NoSql;
 
 class Programm
 {
+
 
     private static void PrintTable(IEnumerable<(string Name, string Value)> dataList,
           string name, string valueName)
@@ -22,7 +26,9 @@ class Programm
         // Data acsess Доступ к данным(Работа с файловой системой)
         // Buiseness logic Бизнес-логика(Сортировка)
         // Presentation Представлеие(Вывод в консоль) 
-        var fileModelDao = new FileModelDaо($@"{Environment.CurrentDirectory}\Database.txt");
+        using IFileSystemItemDao fileModelDao =
+                    new System_analyzer.Daos.FileSystem.FileSystemItemDao($@"{Environment.CurrentDirectory}\Database.txt");
+
         var localData = new List<IFileSystemItem>();
         var data = fileModelDao.GetAll().ToList();
         Console.WriteLine("Please enter the path: ");
@@ -67,13 +73,13 @@ class Programm
                     Console.WriteLine("Please enter the path you want to rescan:");
                     var path = Console.ReadLine();
                     data.RemoveAll(x => x.Path.Contains(path!));
-                    fileModelDao.ReScanDirecory(path!);
+                    data.AddRange(FileSystemProvider.Get(path!));
                 }
                 else if (serviceNumber == 7)
                 {
                     Console.WriteLine("Please enter the path you want to get info:");
                     inputValue = Console.ReadLine();
-                    localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!);
+                    localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!, localData);
                     PrintTable(DataServices.GetDirectoryAttachmentInfo(localData), "Name of Item", "File size");
 
                 }

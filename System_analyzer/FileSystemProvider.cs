@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 
 
 namespace System_analyzer
@@ -88,9 +89,32 @@ namespace System_analyzer
                         .Sum()));
                 return result;
             }
-            // Не доделано
+            else
+            {
+                var result = new List<IFileSystemItem>();
+                foreach (var item in data)
+                    if(item.Path.EndsWith(newPath)) 
+                        result.Add(item);
+                return result;
+            }
         }
-
+        //public void ReScanDirecory(string path)
+        //{
+        //    long startIndex = -1;
+        //    var tail = new List<IFileSystemItem>();
+        //    foreach (var line in File.ReadAllLines(_dataBasePath))
+        //    {
+        //        if (!tail.Any() && !line.Contains(path))
+        //            startIndex += line.Length + Environment.NewLine.Length;
+        //        if (line.Contains(path))
+        //            tail.Add(System.Text.Json.JsonSerializer.Deserialize<IFileSystemItem>(line));
+        //    }
+        //    var dataString = tail.Select(x => $"{System.Text.Json.JsonSerializer.Serialize(x)}\n");
+        //    using var fs = File.OpenWrite(_dataBasePath);
+        //    fs.Position = startIndex;
+        //    foreach (var str in dataString)
+        //        fs.Write(Encoding.Default.GetBytes(str));
+        }
     }
 }
   
