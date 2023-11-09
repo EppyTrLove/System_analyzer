@@ -68,10 +68,11 @@ class Programm
                     {
                         Console.WriteLine($"В выбранном каталоге содержатся переименованные дубликаты файла {model}");
                     }
-                else if (serviceNumber == 6)
+                else if (serviceNumber == 6) //TODO: Add Input verification
                 {
                     Console.WriteLine("Please enter the path you want to rescan:");
                     var path = Console.ReadLine();
+                    if(data.Any(x => x.Path.Contains(path!)))
                     data.RemoveAll(x => x.Path.Contains(path!));
                     data.AddRange(FileSystemProvider.Get(path!));
                 }
@@ -79,7 +80,7 @@ class Programm
                 {
                     Console.WriteLine("Please enter the path you want to get info:");
                     inputValue = Console.ReadLine();
-                    localData = FileSystemProvider.DirectoryAttachmentInfo(inputValue!, localData);
+                    localData = FileSystemProvider.GetAttachmentInfo(inputValue!, localData);
                     PrintTable(DataServices.GetDirectoryAttachmentInfo(localData), "Name of Item", "File size");
 
                 }

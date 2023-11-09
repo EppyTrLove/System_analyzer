@@ -69,52 +69,42 @@ namespace System_analyzer
             }
             return result;
         }
-        public static List<IFileSystemItem> DirectoryAttachmentInfo(string newPath, IEnumerable<IFileSystemItem> data)
+        public static AttachmentInfoModel GetAttachmentInfo(string directoryPath, IEnumerable<IFileSystemItem> data)
         {
-            if (!Directory.Exists(newPath))
+            if (!Directory.Exists(directoryPath))
                 throw new ArgumentException();
-            else if (!data.Any(x => x.Path.Contains(newPath!)))
+
+            if (data.Any(x => x.Path.Contains(directoryPath!)))
             {
+
+                var result = new List<IFileSystemItem>();
+                foreach (var item in data)
+                    if (item.Path.EndsWith(directoryPath))
+                        result.Add(item);
+                return result;
+            }
+            else 
+            {
+                var info = new AttachmentInfoModel();
                 var result = new List<IFileSystemItem>();
                 FileInfo[] files;
                 DirectoryInfo[] subDirs;
-                files = new DirectoryInfo(newPath).GetFiles();
+                files = new DirectoryInfo(directoryPath).GetFiles();
                 foreach (var fi in files)
                     result.Add(new FileModel(fi.FullName, fi.CreationTime, fi.Extension, fi.Length));
-                subDirs = new DirectoryInfo(newPath).GetDirectories();
+                subDirs = new DirectoryInfo(directoryPath).GetDirectories();
                 foreach (var dirInfo in subDirs)
                     result.Add(new DirectoryModel(dirInfo.FullName, dirInfo.Extension, new DirectoryInfo(dirInfo.FullName)
                         .GetFiles("*.*", SearchOption.AllDirectories)
                         .Select(x => x.Length)
                         .Sum()));
-                return result;
-            }
-            else
-            {
-                var result = new List<IFileSystemItem>();
-                foreach (var item in data)
-                    if(item.Path.EndsWith(newPath)) 
-                        result.Add(item);
-                return result;
+                return new AttachmentInfoModel
+                {
+    
+                };
             }
         }
-        //public void ReScanDirecory(string path)
-        //{
-        //    long startIndex = -1;
-        //    var tail = new List<IFileSystemItem>();
-        //    foreach (var line in File.ReadAllLines(_dataBasePath))
-        //    {
-        //        if (!tail.Any() && !line.Contains(path))
-        //            startIndex += line.Length + Environment.NewLine.Length;
-        //        if (line.Contains(path))
-        //            tail.Add(System.Text.Json.JsonSerializer.Deserialize<IFileSystemItem>(line));
-        //    }
-        //    var dataString = tail.Select(x => $"{System.Text.Json.JsonSerializer.Serialize(x)}\n");
-        //    using var fs = File.OpenWrite(_dataBasePath);
-        //    fs.Position = startIndex;
-        //    foreach (var str in dataString)
-        //        fs.Write(Encoding.Default.GetBytes(str));
-        }
+       
     }
 }
   
